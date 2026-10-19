@@ -8,6 +8,10 @@ import {
   type DataforseoResponseLike,
   type DataforseoTaskLike,
 } from "@/server/lib/dataforseo/envelope";
+import {
+  afterDataforseoResponse,
+  beforeBilledDataforseoRequest,
+} from "@/server/wandofi/spendHooks";
 
 const API_BASE = "https://api.dataforseo.com";
 const MAX_DATAFORSEO_ERROR_PAYLOAD_LENGTH = 1600;
@@ -173,6 +177,8 @@ async function requestDataforseo<TTask extends DataforseoTaskLike>(
   body: unknown,
   options: DataforseoRequestOptions,
 ): Promise<DataforseoResponseLike<TTask> | null> {
+  // Wandofi: DataForSEO bills on POST; GETs (task_get, locations) stay free.
+  if (method === "POST") await beforeBilledDataforseoRequest();
   const doFetch = createAuthenticatedFetch(
     options.classify,
     options.maxServerErrorRetries,
@@ -191,6 +197,10 @@ async function requestDataforseo<TTask extends DataforseoTaskLike>(
   // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the task type is the caller's claim about the payload; billing metadata and item fields are validated downstream (envelope.ts + section Zod schemas)
   const parsed = JSON.parse(text) as DataforseoResponseLike<TTask>;
   warnIfUpstreamResponseFailed(parsed, path);
+  // Wandofi: log the cost DataForSEO reports for the whole request.
+  if (typeof parsed.cost === "number") {
+    await afterDataforseoResponse(path, parsed.cost);
+  }
   return parsed;
 }
 

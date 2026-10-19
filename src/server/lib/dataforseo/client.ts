@@ -65,6 +65,7 @@ import {
 } from "@/server/lib/dataforseo/ai-tracking";
 import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 import { AppError } from "@/server/lib/errors";
+import { runWithSpendContext } from "@/server/wandofi/spendHooks";
 
 export { mapDataforseoPathToCreditFeature };
 
@@ -318,6 +319,29 @@ export function createDataforseoClient(customer: BillingCustomerContext) {
   } as const;
 }
 
+// Wandofi: attribute every call below to its project for the spend log and
+// per-project caps (src/server/wandofi/spendHooks.ts).
+function meterDataforseoCalls<T>(
+  customer: BillingCustomerContext,
+  executes: Array<() => Promise<DataforseoApiResponse<T>>>,
+  callCredits: number[],
+  creditFeature?: CreditFeature,
+): Promise<PromiseSettledResult<T>[]> {
+  return runWithSpendContext(
+    {
+      projectId: customer.projectId,
+      organizationId: customer.organizationId,
+    },
+    () =>
+      meterDataforseoCallsUnscoped(
+        customer,
+        executes,
+        callCredits,
+        creditFeature,
+      ),
+  );
+}
+
 /**
  * The one seam every DataForSEO charge passes through (hosted mode only).
  * Order: reserve the estimate on the org's credits -> provider calls -> settle
@@ -330,7 +354,7 @@ export function createDataforseoClient(customer: BillingCustomerContext) {
  * requests per rank check batch, and enough of them hit the SDK's timeout to
  * drop charges.
  */
-async function meterDataforseoCalls<T>(
+async function meterDataforseoCallsUnscoped<T>(
   customer: BillingCustomerContext,
   executes: Array<() => Promise<DataforseoApiResponse<T>>>,
   callCredits: number[],
