@@ -301,6 +301,10 @@ const dataEnv = {
   // Alchemy reconciles worker vars on every deploy, so the telemetry opt-out
   // must live in the env file — a dashboard-set var would be wiped.
   OPENSEO_TELEMETRY_DISABLED: optionalVar("OPENSEO_TELEMETRY_DISABLED"),
+  // Wandofi: monthly DataForSEO spend cap in USD (docs/WANDOFI.md).
+  WANDOFI_DATAFORSEO_MONTHLY_CAP_USD: optionalVar(
+    "WANDOFI_DATAFORSEO_MONTHLY_CAP_USD",
+  ),
 };
 
 export default Alchemy.Stack(
@@ -410,6 +414,8 @@ export default Alchemy.Stack(
         CRAWLER_ACCESS_SECRET: dataEnv.CRAWLER_ACCESS_SECRET,
         CONTEXT_API_KEY: dataEnv.CONTEXT_API_KEY,
         DATAFORSEO_API_KEY: dataEnv.DATAFORSEO_API_KEY,
+        WANDOFI_DATAFORSEO_MONTHLY_CAP_USD:
+          dataEnv.WANDOFI_DATAFORSEO_MONTHLY_CAP_USD,
         AUTUMN_SECRET_KEY: dataEnv.AUTUMN_SECRET_KEY,
         POSTHOG_PUBLIC_KEY: dataEnv.POSTHOG_PUBLIC_KEY,
         POSTHOG_HOST: dataEnv.POSTHOG_HOST,

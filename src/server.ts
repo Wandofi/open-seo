@@ -3,6 +3,10 @@ import {
   defaultStreamHandler,
 } from "@tanstack/react-start/server";
 import { routeAgentRequest } from "agents";
+// Wandofi: DataForSEO spend log and monthly caps (docs/WANDOFI.md).
+import { registerDataforseoSpendGuard } from "@/server/wandofi/spendGuard";
+
+registerDataforseoSpendGuard();
 import { resolveUserContextFromHeaders } from "@/middleware/ensure-user/resolve";
 import { ProjectRepository } from "@/server/features/projects/repositories/ProjectRepository";
 import { SamSessionRepository } from "@/server/features/sam/SamSessionRepository";

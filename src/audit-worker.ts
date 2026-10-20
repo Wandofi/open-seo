@@ -10,6 +10,10 @@
 // stay behind their existing lazy boundaries
 // (vite-plugin-lean-worker-bundle.ts asserts this at build time).
 import { WorkerEntrypoint } from "cloudflare:workers";
+// Wandofi: DataForSEO spend log and monthly caps (docs/WANDOFI.md).
+import { registerDataforseoSpendGuard } from "@/server/wandofi/spendGuard";
+
+registerDataforseoSpendGuard();
 import { getAuditScratchpad } from "@/server/features/audit/AuditScratchpad";
 
 export { SiteAuditWorkflow } from "./server/workflows/SiteAuditWorkflow";
