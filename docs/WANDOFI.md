@@ -27,7 +27,7 @@ O mês conta-se em UTC, desde o dia 1.
 
 ### Como funciona
 
-- `src/server/lib/dataforseo/core.ts` é o único `fetch` por onde passam todos os pedidos à DataForSEO. Antes de cada POST chama `beforeBilledDataforseoRequest()`; depois de cada resposta chama `afterDataforseoResponse()` com o `cost` devolvido.
+- `src/server/lib/dataforseo/core.ts` é o único `fetch` por onde passam todos os pedidos à DataForSEO. Antes de cada POST chama `beforeBilledDataforseoRequest()`; depois da resposta a cada POST chama `afterDataforseoResponse()` com o `cost` devolvido. As respostas a GET não são registadas: um `task_get` devolve o custo da tarefa já paga no `task_post`, e contá-lo duplicaria o gasto.
 - `src/server/wandofi/spendHooks.ts` é um módulo sem dependências, com os ganchos e um `AsyncLocalStorage` que guarda o projecto do pedido. Assim `core.ts` continua a poder ser testado sem base de dados.
 - `src/server/wandofi/spendGuard.ts` tem a lógica (somas do mês, tectos, escrita do registo) e instala os ganchos com `registerDataforseoSpendGuard()`, chamado no arranque dos dois Workers.
 - `src/server/lib/dataforseo/client.ts` abre o contexto do projecto à volta de cada chamada medida. Os pedidos feitos fora do cliente (`DashboardSiteService`, `websiteResearch`) ficam registados sem projecto e contam só para o tecto global.
