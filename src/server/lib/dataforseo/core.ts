@@ -197,8 +197,9 @@ async function requestDataforseo<TTask extends DataforseoTaskLike>(
   // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the task type is the caller's claim about the payload; billing metadata and item fields are validated downstream (envelope.ts + section Zod schemas)
   const parsed = JSON.parse(text) as DataforseoResponseLike<TTask>;
   warnIfUpstreamResponseFailed(parsed, path);
-  // Wandofi: log the cost DataForSEO reports for the whole request.
-  if (typeof parsed.cost === "number") {
+  // Wandofi: log the cost DataForSEO reports for the whole request. Only POSTs
+  // are billed; a task_get GET echoes the cost its task_post already paid.
+  if (method === "POST" && typeof parsed.cost === "number") {
     await afterDataforseoResponse(path, parsed.cost);
   }
   return parsed;
